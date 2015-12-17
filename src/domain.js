@@ -71,7 +71,8 @@ c3_chart_internal_fn.getYDomain = function (targets, axisId, xDomain) {
         domain, domainLength, padding, padding_top, padding_bottom,
         center = axisId === 'y2' ? config.axis_y2_center : config.axis_y_center,
         yDomainAbs, lengths, diff, ratio, isAllPositive, isAllNegative,
-        isZeroBased = ($$.hasType('bar', yTargets) && config.bar_zerobased) || ($$.hasType('area', yTargets) && config.area_zerobased),
+        isZeroBased = ($$.hasType('bar', yTargets) && config.bar_zerobased) || ($$.hasType('area', yTargets) && config.area_zerobased) ||
+            ($$.hasType('line', yTargets) && config.line_zerobased) || ($$.hasType('scatter', yTargets) && config.scatter_zerobased),
         isInverted = axisId === 'y2' ? config.axis_y2_inverted : config.axis_y_inverted,
         showHorizontalDataLabel = $$.hasDataLabel() && config.axis_rotated,
         showVerticalDataLabel = $$.hasDataLabel() && !config.axis_rotated;

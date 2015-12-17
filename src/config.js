@@ -158,6 +158,9 @@ c3_chart_internal_fn.getDefaultConfig = function () {
         // line
         line_connectNull: false,
         line_step_type: 'step',
+        line_zerobased: false,
+        // scatter
+        scatter_zerobased: false,
         // bar
         bar_width: undefined,
         bar_width_ratio: 0.6,
