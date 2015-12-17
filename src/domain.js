@@ -21,7 +21,7 @@ c3_chart_internal_fn.getYDomainMin = function (targets) {
                 if (! ys[id]) { continue; }
                 ys[id].forEach(function (v, i) {
                     if ($$.axis.getId(id) === $$.axis.getId(baseId) && ys[baseId] && !(hasNegativeValue && +v > 0)) {
-                        ys[baseId][i] += +v;
+                        hasNegativeValue ? ys[baseId][i] += +v : ys[id][i] = ys[baseId][i];
                     }
                 });
             }
@@ -52,7 +52,7 @@ c3_chart_internal_fn.getYDomainMax = function (targets) {
                 if (! ys[id]) { continue; }
                 ys[id].forEach(function (v, i) {
                     if ($$.axis.getId(id) === $$.axis.getId(baseId) && ys[baseId] && !(hasPositiveValue && +v < 0)) {
-                        ys[baseId][i] += +v;
+                        hasPositiveValue ? ys[baseId][i] += +v : ys[id][i] = ys[baseId][i];
                     }
                 });
             }
