@@ -139,6 +139,11 @@ c3_chart_internal_fn.getYDomain = function (targets, axisId, xDomain) {
         if (isAllPositive) { padding_bottom = yDomainMin; }
         if (isAllNegative) { padding_top = -yDomainMax; }
     }
+    //
+    else {
+        if (isAllPositive) { padding_bottom = Math.min(padding_bottom, yDomainMin); }
+        if (isAllNegative) { padding_top = Math.min(padding_top, -yDomainMax); }
+    }
     domain = [yDomainMin - padding_bottom, yDomainMax + padding_top];
     return isInverted ? domain.reverse() : domain;
 };
