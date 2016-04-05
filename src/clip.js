@@ -56,3 +56,26 @@ c3_chart_internal_fn.getYAxisClipHeight = function () {
     var $$ = this;
     return $$.getAxisClipHeight($$.config.axis_rotated);
 };
+c3_chart_internal_fn.updateXAxisTickClip = function() {
+    var $$ = this;
+    $$.setXAxisTickClipWidth();
+    $$.setXAxisTickTextClipPathWidth();
+};
+c3_chart_internal_fn.setXAxisTickClipWidth = function() {
+    var $$ = this, config = $$.config;
+    if (!config.axis_x_tick_multiline && config.axis_x_tick_rotate) {
+        var sinRotation = Math.sin(Math.PI / 180 * Math.abs(config.axis_x_tick_rotate));
+        $$.xAxisTickClipPathMaxWidth = ($$.getHorizontalAxisHeight('x') - 20) / sinRotation;
+    }
+    else {
+        $$.xAxisTickClipPathMaxWidth = null;
+    }
+};
+c3_chart_internal_fn.setXAxisTickTextClipPathWidth = function () {
+    var $$ = this;
+    if ($$.svg) {
+        $$.svg.select('#' + $$.clipIdForXAxisTickTexts + ' rect')
+            .attr('width', $$.xAxisTickClipPathMaxWidth)
+            .attr('height', 30);
+    }
+};

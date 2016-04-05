@@ -103,11 +103,13 @@ c3_chart_internal_fn.initParams = function () {
     // MEMO: clipId needs to be unique because it conflicts when multiple charts exist
     $$.clipId = "c3-" + (+new Date()) + '-clip',
     $$.clipIdForXAxis = $$.clipId + '-xaxis',
+    $$.clipIdForXAxisTickTexts = $$.clipId + '-xaxisticktexts',
     $$.clipIdForYAxis = $$.clipId + '-yaxis',
     $$.clipIdForGrid = $$.clipId + '-grid',
     $$.clipIdForSubchart = $$.clipId + '-subchart',
     $$.clipPath = $$.getClipPath($$.clipId),
     $$.clipPathForXAxis = $$.getClipPath($$.clipIdForXAxis),
+    $$.clipPathForXAxisTickTexts = $$.getClipPath($$.clipIdForXAxisTickTexts);
     $$.clipPathForYAxis = $$.getClipPath($$.clipIdForYAxis);
     $$.clipPathForGrid = $$.getClipPath($$.clipIdForGrid),
     $$.clipPathForSubchart = $$.getClipPath($$.clipIdForSubchart),
@@ -259,6 +261,7 @@ c3_chart_internal_fn.initWithData = function (data) {
     $$.clipYAxis = $$.appendClip(defs, $$.clipIdForYAxis);
     $$.clipGrid = $$.appendClip(defs, $$.clipIdForGrid);
     $$.clipSubchart = $$.appendClip(defs, $$.clipIdForSubchart);
+    $$.clipXAxisTickTexts = $$.appendClip(defs, $$.clipIdForXAxisTickTexts);
     $$.updateSvgSize();
 
     // Define regions
@@ -423,6 +426,8 @@ c3_chart_internal_fn.updateSizes = function () {
     if ($$.isLegendRight && hasArc) {
         $$.margin3.left = $$.arcWidth / 2 + $$.radiusExpanded * 1.1;
     }
+
+    $$.updateXAxisTickClip();
 };
 
 c3_chart_internal_fn.updateTargets = function (targets) {
@@ -552,6 +557,10 @@ c3_chart_internal_fn.redraw = function (options, transitions) {
         } else {
             $$.svg.selectAll('.' + CLASS.axisX + ' .tick text').style('display', 'block');
         }
+        // set/unset x_axis_tick_clippath
+        $$.svg.selectAll('.' + CLASS.axisX + ' .tick text').attr('clip-path', function() {
+            return $$.xAxisTickClipPathMaxWidth ? $$.clipPathForXAxisTickTexts : null;
+        });
     }
 
     // setup drawer - MEMO: these must be called after axis updated
