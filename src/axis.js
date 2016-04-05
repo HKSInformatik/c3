@@ -43,7 +43,7 @@ Axis.prototype.getXAxis = function getXAxis(scale, orient, tickFormat, tickValue
             withOuterTick: withOuterTick,
             tickMultiline: config.axis_x_tick_multiline,
             tickWidth: config.axis_x_tick_width,
-            tickTextRotate: withoutRotateTickText ? 0 : config.axis_x_tick_rotate,
+            tickTextRotate: withoutRotateTickText ? 0 : $$.getXAxisTickRotate(),
             withoutTransition: withoutTransition,
         },
         axis = c3_axis($$.d3, axisParams).scale(scale).orient(orient);

@@ -92,18 +92,30 @@ c3_chart_internal_fn.getAxisWidthByAxisId = function (id, withoutRecompute) {
     return $$.axis.getMaxTickWidth(id, withoutRecompute) + (position.isInner ? 20 : 40);
 };
 c3_chart_internal_fn.getHorizontalAxisHeight = function (axisId) {
-    var $$ = this, config = $$.config, h = 30;
+    var $$ = this, config = $$.config, h = 30, xAxisTickRotate = $$.getXAxisTickRotate();
     if (axisId === 'x' && !config.axis_x_show) { return 8; }
     if (axisId === 'x' && config.axis_x_height) { return config.axis_x_height; }
     if (axisId === 'y' && !config.axis_y_show) { return config.legend_show && !$$.isLegendRight && !$$.isLegendInset ? 10 : 1; }
     if (axisId === 'y2' && !config.axis_y2_show) { return $$.rotated_padding_top; }
     // Calculate x axis height when tick rotated
-    if (axisId === 'x' && !config.axis_rotated && config.axis_x_tick_rotate) {
-        h = 30 + $$.axis.getMaxTickWidth(axisId) * Math.cos(Math.PI * (90 - config.axis_x_tick_rotate) / 180);
+    if (axisId === 'x' && !config.axis_rotated && xAxisTickRotate) {
+        h = 30 + $$.axis.getMaxTickWidth(axisId) * Math.cos(Math.PI * (90 - xAxisTickRotate) / 180);
     }
     return h + ($$.axis.getLabelPositionById(axisId).isInner ? 0 : 10) + (axisId === 'y2' ? -10 : 0);
 };
 
 c3_chart_internal_fn.getEventRectWidth = function () {
     return Math.max(0, this.xAxis.tickInterval());
+};
+
+c3_chart_internal_fn.getXAxisTickRotate = function () {
+    var $$ = this, config = $$.config;
+    return !config.axis_x_tick_multiline && config.axis_x_tick_autorotate && !$$.needToRotateXAxisTickTexts() ? 0 : config.axis_x_tick_rotate;
+};
+
+c3_chart_internal_fn.needToRotateXAxisTickTexts = function () {
+    var $$ = this, maxTickWidth = $$.axis.getMaxTickWidth('x'),
+        tickCount = $$.getXDomainMax($$.filterTargetsToShow($$.data.targets)) + 1,
+        xAxisLength = $$.currentWidth - $$.getCurrentPaddingLeft(true) - $$.getCurrentPaddingRight() || 0;
+    return tickCount !== 0 && maxTickWidth > (xAxisLength / tickCount);
 };
