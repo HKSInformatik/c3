@@ -40,9 +40,9 @@ c3_chart_internal_fn.getCurrentPaddingRight = function () {
     } else if (config.axis_rotated) {
         return defaultPadding + legendWidthOnRight;
     } else if (!config.axis_y2_show || config.axis_y2_inner) { // && !config.axis_rotated
-        return 2 + legendWidthOnRight + ($$.axis.getY2AxisLabelPosition().isOuter ? 20 : 0);
+        return Math.max(2 + legendWidthOnRight + ($$.axis.getY2AxisLabelPosition().isOuter ? 20 : 0), $$.axis.getXAxisTickTextY2Overflow());
     } else {
-        return ceil10($$.getAxisWidthByAxisId('y2')) + legendWidthOnRight;
+        return Math.max(ceil10($$.getAxisWidthByAxisId('y2')) + legendWidthOnRight, $$.axis.getXAxisTickTextY2Overflow());
     }
 };
 
@@ -100,6 +100,11 @@ c3_chart_internal_fn.getHorizontalAxisHeight = function (axisId) {
     // Calculate x axis height when tick rotated
     if (axisId === 'x' && !config.axis_rotated && config.axis_x_tick_rotate) {
         h = 30 + $$.axis.getMaxTickWidth(axisId) * Math.cos(Math.PI * (90 - config.axis_x_tick_rotate) / 180);
+        if (!config.axis_x_tick_multiline && $$.currentHeight) {
+            if (h > $$.currentHeight / 2) {
+                h = $$.currentHeight / 2;
+            }
+        }
     }
     return h + ($$.axis.getLabelPositionById(axisId).isInner ? 0 : 10) + (axisId === 'y2' ? -10 : 0);
 };

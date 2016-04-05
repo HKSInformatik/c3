@@ -273,6 +273,9 @@ Axis.prototype.getMaxTickWidth = function getMaxTickWidth(id, withoutRecompute) 
         return $$.currentMaxTickWidths[id];
     }
     if ($$.svg) {
+        if (!$$.currentTickTextWidths) {
+            $$.currentTickTextWidths = {};
+        }
         targetsToShow = $$.filterTargetsToShow($$.data.targets);
         if (id === 'y') {
             scale = $$.y.copy().domain($$.getYDomain(targetsToShow, 'y'));
@@ -288,8 +291,12 @@ Axis.prototype.getMaxTickWidth = function getMaxTickWidth(id, withoutRecompute) 
         dummy = $$.d3.select('body').append('div').classed('c3', true);
         svg = dummy.append("svg").style('visibility', 'hidden').style('position', 'fixed').style('top', 0).style('left', 0),
         svg.append('g').call(axis).each(function () {
-            $$.d3.select(this).selectAll('text').each(function () {
+            $$.d3.select(this).selectAll('text').each(function (d, i) {
                 var box = this.getBoundingClientRect();
+                if (id === 'x') {
+                    // cache tick text width for getXAxisTickTextY2Overflow()
+                    $$.currentTickTextWidths[i] = box.width;
+                }
                 if (maxWidth < box.width) { maxWidth = box.width; }
             });
             dummy.remove();
@@ -297,6 +304,25 @@ Axis.prototype.getMaxTickWidth = function getMaxTickWidth(id, withoutRecompute) 
     }
     $$.currentMaxTickWidths[id] = maxWidth <= 0 ? $$.currentMaxTickWidths[id] : maxWidth;
     return $$.currentMaxTickWidths[id];
+};
+
+Axis.prototype.getXAxisTickTextY2Overflow = function getXAxisTickTextY2Overflow() {
+    var $$ = this.owner, xAxisLength = $$.width, maxX = 0, tickTextWidths = $$.currentTickTextWidths || {},
+        positiveRotation = $$.config.axis_x_tick_rotate > 0 && $$.config.axis_x_tick_rotate < 90;
+    if (!$$.config.axis_x_tick_multiline && xAxisLength && positiveRotation) {
+        var tickCount = Object.keys(tickTextWidths).length,
+            tickLength = xAxisLength / tickCount;
+        for (var i = 0; i < tickCount; i++) {
+            var minTickWidth = $$.xAxisTickClipPathMaxWidth ? Math.min(tickTextWidths[i], $$.xAxisTickClipPathMaxWidth) : tickTextWidths[i],
+                rotatedTickTextWidth = Math.cos(Math.PI * $$.config.axis_x_tick_rotate / 180) * minTickWidth,
+                textEndX = tickLength * i + tickLength / 2 + rotatedTickTextWidth;
+            if (maxX < textEndX) {
+                maxX = textEndX;
+            }
+        }
+        return Math.min(Math.max(0, maxX - xAxisLength), xAxisLength / 2);
+    }
+    return 0;
 };
 
 Axis.prototype.updateLabels = function updateLabels(withTransition) {
