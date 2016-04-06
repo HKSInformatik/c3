@@ -32,17 +32,17 @@ c3_chart_internal_fn.getCurrentPaddingLeft = function (withoutRecompute) {
         return ceil10($$.getAxisWidthByAxisId('y', withoutRecompute));
     }
 };
-c3_chart_internal_fn.getCurrentPaddingRight = function () {
-    var $$ = this, config = $$.config,
+c3_chart_internal_fn.getCurrentPaddingRight = function (withoutTickTextOverflow) {
+    var $$ = this, config = $$.config, xAxisTickTextOverflow = withoutTickTextOverflow ? 0 : $$.axis.getXAxisTickTextY2Overflow(),
         defaultPadding = 10, legendWidthOnRight = $$.isLegendRight ? $$.getLegendWidth() + 20 : 0;
     if (isValue(config.padding_right)) {
         return config.padding_right + 1; // 1 is needed not to hide tick line
     } else if (config.axis_rotated) {
         return defaultPadding + legendWidthOnRight;
     } else if (!config.axis_y2_show || config.axis_y2_inner) { // && !config.axis_rotated
-        return 2 + legendWidthOnRight + ($$.axis.getY2AxisLabelPosition().isOuter ? 20 : 0);
+        return Math.max(2 + legendWidthOnRight + ($$.axis.getY2AxisLabelPosition().isOuter ? 20 : 0), xAxisTickTextOverflow);
     } else {
-        return ceil10($$.getAxisWidthByAxisId('y2')) + legendWidthOnRight;
+        return Math.max(ceil10($$.getAxisWidthByAxisId('y2')) + legendWidthOnRight, xAxisTickTextOverflow);
     }
 };
 
@@ -100,6 +100,11 @@ c3_chart_internal_fn.getHorizontalAxisHeight = function (axisId) {
     // Calculate x axis height when tick rotated
     if (axisId === 'x' && !config.axis_rotated && xAxisTickRotate) {
         h = 30 + $$.axis.getMaxTickWidth(axisId) * Math.cos(Math.PI * (90 - xAxisTickRotate) / 180);
+        if (!config.axis_x_tick_multiline && $$.currentHeight) {
+            if (h > $$.currentHeight / 2) {
+                h = $$.currentHeight / 2;
+            }
+        }
     }
     return h + ($$.axis.getLabelPositionById(axisId).isInner ? 0 : 10) + (axisId === 'y2' ? -10 : 0);
 };
@@ -116,6 +121,6 @@ c3_chart_internal_fn.getXAxisTickRotate = function () {
 c3_chart_internal_fn.needToRotateXAxisTickTexts = function () {
     var $$ = this, maxTickWidth = $$.axis.getMaxTickWidth('x'),
         tickCount = $$.getXDomainMax($$.filterTargetsToShow($$.data.targets)) + 1,
-        xAxisLength = $$.currentWidth - $$.getCurrentPaddingLeft(true) - $$.getCurrentPaddingRight() || 0;
+        xAxisLength = $$.currentWidth - $$.getCurrentPaddingLeft(true) - $$.getCurrentPaddingRight(true) || 0;
     return tickCount !== 0 && maxTickWidth > (xAxisLength / tickCount);
 };
